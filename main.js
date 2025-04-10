@@ -1,25 +1,30 @@
 import { getDogImages, getCatImage } from './api.js';
 
+var isCat = false;
+
 function shuffleArray(array) {
     return array.sort(() => Math.random() - 0.5);
 }
 
 async function fetchDogImagesAndCatImage() {
+    isCat = false;
     try {
         // Show loading spinner while fetching data
         const loadingSpinner = document.querySelector('.loading');
         loadingSpinner.style.display = 'block';
 
+        // Fetch dog images and cat image in parallel
         const [dogImages1, dogImages2, catImage] = await Promise.all([getDogImages(), getDogImages(), getCatImage()]);
         let allImages = [...dogImages1, ...dogImages2, ...catImage];
         allImages = shuffleArray(allImages);
+
         // Preload all images
         await preloadImages(allImages);
-        console.log("Cat Image: "+catImage);
 
         // Hide loading spinner after fetching data
         loadingSpinner.style.display = 'none';
-        imageDisplay.style.display = 'inline-block';
+        const imageDisplay = document.getElementById('imageDisplay');
+        imageDisplay.style.display = 'inline-block'; // Show image display area
 
         // Call the function to display all images in sequence
         displayImagesInSequence(allImages);
@@ -48,10 +53,10 @@ function preloadImages(imageUrls) {
 function displayImagesInSequence(images) {
     const imgElement = document.getElementById("imageDisplay"); // The same image element will be updated
     let index = 0;
-    let delay = 800; // Start at 700 milliseconds
+    let delay = 700; // Start at 700 milliseconds
     const minDelay = 150; // Minimum delay: 150 milliseconds
     const totalImages = images.length;
-    const decrement = (800 - minDelay) / (totalImages - 1); // Smooth decrement
+    const decrement = (700 - minDelay) / (totalImages - 1); // Smooth decrement
 
     function showNextImage() {
         if (index >= totalImages) {
@@ -63,6 +68,10 @@ function displayImagesInSequence(images) {
         imgElement.src = images[index];
         imgElement.setAttribute('data-image-type', images[index].includes('cat') ? 'cat' : 'dog');
 
+        if(images[index].includes('cat')){
+            isCat= true;
+        }
+
         // Store the current time when the image is displayed
         const displayTime = new Date().getTime();  // Current timestamp in milliseconds
         imgElement.setAttribute('data-display-time', displayTime)
@@ -71,7 +80,9 @@ function displayImagesInSequence(images) {
         // Gradually reduce the delay, stop reducing once minDelay is reached
         // delay = Math.max(minDelay, delay - decrement);
 
-        setTimeout(showNextImage, delay);
+          // Gradually reduce the delay, stop reducing once minDelay is reached
+          delay = Math.max(minDelay, delay - decrement);
+          setTimeout(showNextImage, delay);
     }
 
     showNextImage();
@@ -104,8 +115,17 @@ function handleStart() {
     }
     localStorage.setItem('userName', JSON.stringify(userName));
 
+    // Remove any previous game or result sections
+    const oldGame = document.getElementById("game");
+    if (oldGame) oldGame.remove();
+
+    const oldResult = document.getElementById("result");
+    if (oldResult) oldResult.remove();
+
+    // Hide the container1 (home screen)
     document.querySelector('.container1').style.display = 'none';
-    
+
+    // Create the new game section (show this immediately)
     const gameDiv = document.createElement("div");
     gameDiv.id = "game";
     gameDiv.innerHTML = `
@@ -120,19 +140,21 @@ function handleStart() {
                 <img id="imageDisplay" class="dogImage" alt="Dog image" />
                 <button class="stopBtn"></button>
             </div>
-            
         </div>
     `;
     document.body.appendChild(gameDiv);
 
+    // Set up the stop button event listener
     const stopButton = document.querySelector('.stopBtn');
-    stopButton.addEventListener('click', handleStop); 
+    stopButton.addEventListener('click', handleStop);
 
-    // Call fetchDogImages after the game container is rendered
+    // Reset the isCat variable
+    isCat = false;
+
+    // Start the image fetching process after rendering the game UI
     fetchDogImagesAndCatImage();
 }
 
-let attemptsLeft = 2; 
 
 function handleStop() {
     const imgElement = document.getElementById("imageDisplay");
@@ -152,12 +174,8 @@ function handleStop() {
     const seconds = Math.floor(timeDifference / 1000);
     const milliseconds = timeDifference % 1000;
 
-    // Check if the image displayed is a 'cat'
-    const isCat = imgElement.getAttribute('data-image-type') === 'cat';
-    const isDog = imgElement.getAttribute('data-image-type') === 'dog';
-
     if (isCat) {
-        console.log(`You won! The cat image was displayed for ${seconds} seconds and ${milliseconds} milliseconds.`);
+        console.log(`The cat image was displayed! Your reaction time was ${seconds} seconds and ${milliseconds} milliseconds.`);
         
         document.querySelector('.gameContainer').style.display = 'none';
 
@@ -167,8 +185,8 @@ function handleStop() {
             <div class="resultContainer">
                 <div class="imageContainer">
                     <h1 class="welcome">Congratulations, ${userName}!</h1>
-                    <h2>You won! The cat image was displayed for ${seconds} seconds and ${milliseconds} milliseconds.</h2>
-                    <button class="startBtn">Play Again</button>
+                    <h2>The cat image was displayed! Your reaction time was ${seconds}.${milliseconds} seconds.</h2>
+                    <img id="imageDisplay" class="dogImage" alt="Dog image" />
                 </div>
             </div>
         `;
@@ -176,17 +194,9 @@ function handleStop() {
 
         const againButton = document.querySelector('.startBtn');
         againButton.addEventListener('click', handleStart); // Re-start the game
-    } else if(isDog){
-        attemptsLeft--;
+    } else{
 
         document.querySelector('.gameContainer').style.display = 'none';
-
-        let resultMessage = '';
-        if (attemptsLeft > 0) {
-            resultMessage = `You lost this round! You have ${attemptsLeft} attempt(s) left.`;
-        } else {
-            resultMessage = "You lost! No attempts left.";
-        }
 
         const resultDiv = document.createElement("div");
         resultDiv.id = "result";
@@ -194,8 +204,7 @@ function handleStop() {
             <div class="resultContainer">
                 <div class="imageContainer">
                     <h1 class="welcome">Oops, ${userName}!</h1>
-                    <h2>${resultMessage}</h2>
-                    <button class="startBtn">Play Again</button>
+                    <h2>You lose! The cat image was not displayed.</h2>
                 </div>
             </div>
         `;
