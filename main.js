@@ -13,6 +13,8 @@ async function fetchDogImagesAndCatImage() {
         const [dogImages1, dogImages2, catImage] = await Promise.all([getDogImages(), getDogImages(), getCatImage()]);
         let allImages = [...dogImages1, ...dogImages2, ...catImage];
         allImages = shuffleArray(allImages);
+        // Preload all images
+        await preloadImages(allImages);
         console.log("Cat Image: "+catImage);
 
         // Hide loading spinner after fetching data
@@ -29,13 +31,27 @@ async function fetchDogImagesAndCatImage() {
     }
 }
 
+
+function preloadImages(imageUrls) {
+    return Promise.all(
+        imageUrls.map(url => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = url;
+                img.onload = () => resolve(url);   // resolve when image is loaded
+                img.onerror = reject;
+            });
+        })
+    );
+}
+
 function displayImagesInSequence(images) {
     const imgElement = document.getElementById("imageDisplay"); // The same image element will be updated
     let index = 0;
-    let delay = 1200; // Start at 700 milliseconds
+    let delay = 800; // Start at 700 milliseconds
     const minDelay = 150; // Minimum delay: 150 milliseconds
     const totalImages = images.length;
-    const decrement = (1200 - minDelay) / (totalImages - 1); // Smooth decrement
+    const decrement = (800 - minDelay) / (totalImages - 1); // Smooth decrement
 
     function showNextImage() {
         if (index >= totalImages) {
