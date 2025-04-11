@@ -1,6 +1,7 @@
-import { getDogImages, getCatImage } from './api.js';
+import { getDogImages, getCatImage, startGameData, changeScore } from './api.js';
 
 var isCat = false;
+let catimage;
 
 function shuffleArray(array) {
     return array.sort(() => Math.random() - 0.5);
@@ -15,6 +16,8 @@ async function fetchDogImagesAndCatImage() {
 
         // Fetch dog images and cat image in parallel
         const [dogImages1, dogImages2, catImage] = await Promise.all([getDogImages(), getDogImages(), getCatImage()]);
+        catimage = catImage[0];
+        console.log(catimage);
         let allImages = [...dogImages1, ...dogImages2, ...catImage];
         allImages = shuffleArray(allImages);
 
@@ -114,6 +117,7 @@ function handleStart() {
         return;
     }
     localStorage.setItem('userName', JSON.stringify(userName));
+    startGameData(userName);
 
     // Remove any previous game or result sections
     const oldGame = document.getElementById("game");
@@ -186,10 +190,13 @@ function handleStop() {
                 <div class="imageContainer">
                     <h1 class="welcome">Congratulations, ${userName}!</h1>
                     <h2>The cat image was displayed! Your reaction time was ${seconds}.${milliseconds} seconds.</h2>
-                    <img id="imageDisplay" class="dogImage" alt="Dog image" />
+                    <img src="${catimage}" id="imageDisplay" class="dogImage" alt="Dog image" />
                 </div>
             </div>
         `;
+        console.log(`${catimage}`);
+        changeScore(Date.now(), `${seconds}.${milliseconds}`);
+
         document.body.appendChild(resultDiv);
 
         const againButton = document.querySelector('.startBtn');
@@ -205,9 +212,11 @@ function handleStop() {
                 <div class="imageContainer">
                     <h1 class="welcome">Oops, ${userName}!</h1>
                     <h2>You lose! The cat image was not displayed.</h2>
+                    <img src="${catimage}" id="imageDisplay" class="dogImage" alt="Dog image" />
                 </div>
             </div>
         `;
+        changeScore(Date.now(), 0);
         document.body.appendChild(resultDiv);
 
         const againButton = document.querySelector('.startBtn');

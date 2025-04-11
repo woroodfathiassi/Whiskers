@@ -67,3 +67,83 @@ export function getCatImage() {
             return [];  // return empty array if there is a problem
         });
 }
+
+export function startGameData(name) {
+    const gameData = {
+        playerName: name,
+        score: 0
+    };
+
+    return fetch('https://reqres.in/api/games', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(gameData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('New game session created:', data);
+            // Now, return the game session data (or ID) for later use
+            return data;
+        })
+        .catch(error => {
+            console.error('Error creating game session:', error);
+        });
+}
+
+export function changeScore(gameId, newScore) {
+    const scoreData = {
+        score: newScore
+    };
+
+    return fetch(`https://reqres.in/api/games/${gameId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(scoreData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Score updated:', data);
+            return data; // Returns the updated score data
+        })
+        .catch(error => {
+            console.error('Error updating score:', error);
+        });
+}
+
+export function getScore(gameId) {
+    return fetch(`https://reqres.in/api/games/${gameId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Current score:', data.score);
+            return data; // Returns the current score data
+        })
+        .catch(error => {
+            console.error('Error getting score:', error);
+        });
+}
+
+export function deleteUserSession(gameId) {
+    return fetch(`https://reqres.in/api/games/${gameId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => {
+            if (response.status === 204) {
+                console.log('Game session deleted successfully');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting game session:', error);
+        });
+}
