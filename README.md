@@ -78,3 +78,9 @@ This project showcases:
 ## 🎮 Screenshots
 
 ![Image](https://github.com/user-attachments/assets/d1ca4362-5062-4161-8eec-3abe4aefeb07)
+
+---
+
+## 🙌 Contributors
+- 👩‍💻 Hanadi Asfour
+- 👩‍💻 Worood Assi
