@@ -75,6 +75,12 @@ This project showcases:
 
 ---
 
+## 🚀 How To Run:
+
+Go to this link to play the game: https://woroodfathiassi.github.io/Whiskers/
+
+---
+
 ## 🎮 Screenshots
 
 ![Image](https://github.com/user-attachments/assets/d1ca4362-5062-4161-8eec-3abe4aefeb07)
@@ -82,5 +88,5 @@ This project showcases:
 ---
 
 ## 🙌 Contributors
-- 👩‍💻 Hanadi Asfour
-- 👩‍💻 Worood Assi
+- 👩‍💻 Hanadi Asfour 1210209
+- 👩‍💻 Worood Assi 1210412
