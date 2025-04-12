@@ -172,3 +172,12 @@ body{
         transform: scale(1.1) translateY(-10px);  /* Moves the button up */
     }
 }
+
+#span{
+    font-size: 30px;
+    font-weight: bold;
+}
+
+#p{
+    font-size: 20px;
+}
