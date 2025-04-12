@@ -197,9 +197,8 @@ function handleStop() {
         resultDiv.innerHTML = `
             <div class="resultContainer">
                 <div class="imageContainer">
-                    <h1 class="welcome">Congratulations, ${userName}!</h1>
+                    <h1 class="welcome">Nice Catch ${userName}!</h1>
                     <p id="p">The cat image was displayed! Your reaction time was <span id="span">${seconds}.${milliseconds}</span> seconds.</p>
-                    
                     <img src="${catimage}" id="imageDisplay" class="dogImage" alt="Dog image" />
                 </div>
             </div>
