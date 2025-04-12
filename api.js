@@ -74,7 +74,7 @@ export function startGameData(name) {
         score: 0
     };
 
-    return fetch('https://reqres.in/api/games', {
+    return fetch('https://reqres.in/api/users', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -98,7 +98,7 @@ export function changeScore(gameId, newScore) {
         score: newScore
     };
 
-    return fetch(`https://reqres.in/api/games/${gameId}`, {
+    return fetch(`https://reqres.in/api/users/${gameId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json'
@@ -116,7 +116,7 @@ export function changeScore(gameId, newScore) {
 }
 
 export function getScore(gameId) {
-    return fetch(`https://reqres.in/api/games/${gameId}`, {
+    return fetch(`https://reqres.in/api/users/${gameId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -133,7 +133,7 @@ export function getScore(gameId) {
 }
 
 export function deleteUserSession(gameId) {
-    return fetch(`https://reqres.in/api/games/${gameId}`, {
+    return fetch(`https://reqres.in/api/users/${gameId}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json'
