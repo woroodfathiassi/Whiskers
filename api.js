@@ -85,7 +85,8 @@ export function startGameData(name) {
         .then(data => {
             console.log('New game session created:', data);
             // Now, return the game session data (or ID) for later use
-            return data;
+            const id = data.id;
+            return id;
         })
         .catch(error => {
             console.error('Error creating game session:', error);

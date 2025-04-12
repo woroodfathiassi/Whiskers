@@ -1,7 +1,8 @@
-import { getDogImages, getCatImage, startGameData, changeScore } from './api.js';
+import { getDogImages, getCatImage, startGameData, changeScore, getScore, deleteUserSession } from './api.js';
 
 var isCat = false;
 let catimage;
+let gameId;
 
 function shuffleArray(array) {
     return array.sort(() => Math.random() - 0.5);
@@ -83,9 +84,9 @@ function displayImagesInSequence(images) {
         // Gradually reduce the delay, stop reducing once minDelay is reached
         // delay = Math.max(minDelay, delay - decrement);
 
-          // Gradually reduce the delay, stop reducing once minDelay is reached
-          delay = Math.max(minDelay, delay - decrement);
-          setTimeout(showNextImage, delay);
+        // Gradually reduce the delay, stop reducing once minDelay is reached
+        delay = Math.max(minDelay, delay - decrement);
+        setTimeout(showNextImage, delay);
     }
 
     showNextImage();
@@ -110,55 +111,63 @@ document.addEventListener("DOMContentLoaded", function () {
     startButton.addEventListener('click', handleStart);
 });
 
-function handleStart() {
+async function handleStart() {
     userName = document.getElementById("userName").value;
     if (!userName || userName.trim() === "") {
         alert("Please enter a user name");
         return;
     }
+
     localStorage.setItem('userName', JSON.stringify(userName));
-    startGameData(userName);
 
-    // Remove any previous game or result sections
-    const oldGame = document.getElementById("game");
-    if (oldGame) oldGame.remove();
+    try {
+        gameId = await startGameData(userName);
+        console.log('Game ID:', gameId); 
 
-    const oldResult = document.getElementById("result");
-    if (oldResult) oldResult.remove();
+        // Remove any previous game or result sections
+        const oldGame = document.getElementById("game");
+        if (oldGame) oldGame.remove();
 
-    // Hide the container1 (home screen)
-    document.querySelector('.container1').style.display = 'none';
+        const oldResult = document.getElementById("result");
+        if (oldResult) oldResult.remove();
 
-    // Create the new game section (show this immediately)
-    const gameDiv = document.createElement("div");
-    gameDiv.id = "game";
-    gameDiv.innerHTML = `
-        <div class="gameContainer">
-            <h1 class="welcome">Welcome ${userName}</h1>
-            <!-- Loading Spinner -->
-            <div class="loading" style="display:none;">
-                <div class="spinner"></div>
+        // Hide the container1 (home screen)
+        document.querySelector('.container1').style.display = 'none';
+
+        // Create the new game section (show this immediately)
+        const gameDiv = document.createElement("div");
+        gameDiv.id = "game";
+        gameDiv.innerHTML = `
+            <div class="gameContainer">
+                <h1 class="welcome">Welcome ${userName}</h1>
+                <!-- Loading Spinner -->
+                <div class="loading" style="display:none;">
+                    <div class="spinner"></div>
+                </div>
+                <!-- Image Display Area -->
+                <div class="imageContainer">
+                    <img id="imageDisplay" class="dogImage" alt="Dog image" />
+                    <button class="stopBtn"></button>
+                </div>
             </div>
-            <!-- Image Display Area -->
-            <div class="imageContainer">
-                <img id="imageDisplay" class="dogImage" alt="Dog image" />
-                <button class="stopBtn"></button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(gameDiv);
+        `;
+        document.body.appendChild(gameDiv);
 
-    // Set up the stop button event listener
-    const stopButton = document.querySelector('.stopBtn');
-    stopButton.addEventListener('click', handleStop);
+        // Set up the stop button event listener
+        const stopButton = document.querySelector('.stopBtn');
+        stopButton.addEventListener('click', handleStop);
 
-    // Reset the isCat variable
-    isCat = false;
+        // Reset the isCat variable
+        isCat = false;
 
-    // Start the image fetching process after rendering the game UI
-    fetchDogImagesAndCatImage();
+        // Start the image fetching process after rendering the game UI
+        fetchDogImagesAndCatImage();
+
+    } catch (error) {
+        console.error("Failed to start game:", error);
+        alert("Something went wrong starting the game.");
+    }
 }
-
 
 function handleStop() {
     const imgElement = document.getElementById("imageDisplay");
@@ -195,8 +204,8 @@ function handleStop() {
             </div>
         `;
         console.log(`${catimage}`);
-        changeScore(Date.now(), `${seconds}.${milliseconds}`);
-
+        changeScore(gameId, `${seconds}.${milliseconds}`);
+        deleteUserSession(gameId);
         document.body.appendChild(resultDiv);
 
         const againButton = document.querySelector('.startBtn');
@@ -216,7 +225,8 @@ function handleStop() {
                 </div>
             </div>
         `;
-        changeScore(Date.now(), 0);
+        changeScore(gameId, 0);
+        deleteUserSession(gameId);
         document.body.appendChild(resultDiv);
 
         const againButton = document.querySelector('.startBtn');
